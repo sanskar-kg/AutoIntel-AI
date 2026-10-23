@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- PayU test endpoints are debug-only and must not ship in release builds. -->
+        <meta-data
+            android:name="payu_debug_mode_enabled"
+            android:value="true" />
+        <meta-data
+            android:name="payu_web_service_url"
+            android:value="https://test.payu.in" />
+        <meta-data
+            android:name="payu_post_url"
+            android:value="https://test.payu.in" />
+    </application>
+</manifest>

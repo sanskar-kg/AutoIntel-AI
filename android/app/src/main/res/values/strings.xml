@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SINGLE SOURCE OF TRUTH for every user-visible string.
+  Do not hard-code text in Dart. After editing run:  dart run tool/gen_strings.dart
+  Translations (values-xx/strings.xml) come from Play Console's translation service.
+  Placeholders are positional (%1$s string, %1$d integer) so translators can reorder them.
+-->
+<resources>
+    <string name="app_name" translatable="false">AutoIntel AI</string>
+    <string name="truecaller_client_id" translatable="false">hqes5y3uvngfijv3oggjff0dioiu8edjicwdt3tgnba</string>
+    <string name="brand_wordmark" translatable="false">AutoIntel</string>
+    <string name="brand_tagline">A MIC product</string>
+
+    <!-- Common -->
+    <string name="common_continue">Continue</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_retry">Try again</string>
+    <string name="common_close">Close</string>
+    <string name="common_loading">Please wait</string>
+    <string name="common_back">Back</string>
+    <string name="common_not_available">Not available</string>
+
+    <!-- Remote Config gates -->
+    <string name="remote_update_title">Update required</string>
+    <string name="remote_update_body">Please update AutoIntel to continue.</string>
+    <string name="remote_update_action">Update app</string>
+    <string name="remote_stall_title">Temporarily unavailable</string>
+    <string name="remote_stall_body">AutoIntel is being updated. Please try again shortly.</string>
+
+    <!-- First-run tooltips -->
+    <string name="tooltip_home">Start a vehicle lookup from Home.</string>
+    <string name="tooltip_wallet">Manage your balance and payments in Wallet.</string>
+
+    <!-- Authentication -->
+    <string name="auth_title">Sign in to AutoIntel</string>
+    <string name="auth_truecaller">Get started</string>
+    <string name="auth_temporary">Continue temporarily</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_wallet">Wallet</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="home_tile_rc_title">Vehicle Details</string>
+    <string name="home_tile_rc_subtitle">Owner, maker and model from the plate number</string>
+    <string name="home_tile_phone_title">Owner Phone Search</string>
+    <string name="home_tile_phone_subtitle">Get the owner\'s phone number instantly</string>
+    <!-- Small pill on a tile. %1$s is a price such as ₹2 -->
+    <string name="home_tile_price">%1$s per search</string>
+    <string name="home_wallet_chip_label">Wallet balance</string>
+    <string name="home_tile_locked">Recharge to unlock</string>
+
+    <!-- Language -->
+    <string name="language_title">App language</string>
+    <string name="language_system_default">Device language</string>
+
+    <!-- Recharge gate -->
+    <string name="gate_title">Add money to get started</string>
+    <!-- %1$s is the minimum amount such as ₹20 -->
+    <string name="gate_body">A minimum recharge of %1$s is needed to use lookups. Your balance is only used when a search succeeds.</string>
+    <string name="gate_prices_title">What searches cost</string>
+    <string name="gate_price_rc">Vehicle details</string>
+    <string name="gate_price_phone">Owner phone number</string>
+    <!-- Button. %1$s is the amount such as ₹100 -->
+    <string name="gate_pay_button">Pay %1$s</string>
+    <string name="gate_later_button">I\'ll do it later</string>
+
+    <!-- Amount picker -->
+    <string name="amount_custom_label">Other amount</string>
+    <!-- %1$s is the minimum amount -->
+    <string name="amount_custom_hint">Enter amount (min %1$s)</string>
+    <!-- %1$s is the minimum amount -->
+    <string name="amount_error_min">Minimum recharge is %1$s</string>
+    <!-- %1$s is the maximum amount -->
+    <string name="amount_error_max">Maximum recharge is %1$s</string>
+
+    <!-- Lookup (shared) -->
+    <string name="lookup_rc_title">Vehicle Details</string>
+    <string name="lookup_phone_title">Owner Phone Search</string>
+    <string name="lookup_rc_intro">Enter the registration number to see the owner, maker and model.</string>
+    <string name="lookup_phone_intro">Enter the registration number to get the owner\'s phone number.</string>
+    <string name="lookup_field_label">Registration number</string>
+    <string name="lookup_field_hint">MH12AB1234</string>
+    <string name="lookup_error_invalid">Enter a valid registration number, like MH12AB1234</string>
+    <!-- %1$s is the price, %2$s is the balance -->
+    <string name="lookup_cost_info">This search costs %1$s · Balance %2$s</string>
+    <!-- Button. %1$s is the price such as ₹2 -->
+    <string name="lookup_button_search">Search for %1$s</string>
+    <string name="lookup_button_recharge">Recharge to continue</string>
+    <!-- Confirm charge sheet -->
+    <string name="confirm_title">Confirm search</string>
+    <string name="confirm_reg_label">Registration number</string>
+    <string name="confirm_price_label">Price</string>
+    <string name="confirm_balance_after_label">Balance after</string>
+
+    <!-- Result -->
+    <string name="result_title_rc">Vehicle details</string>
+    <string name="result_title_phone">Owner phone</string>
+    <string name="result_owner_name">Owner name</string>
+    <string name="result_maker">Maker</string>
+    <string name="result_model">Model</string>
+    <string name="result_fuel_type">Fuel type</string>
+    <string name="result_vehicle_class">Vehicle class</string>
+    <string name="result_registration_date">Registration date</string>
+    <string name="result_rto">Registering authority</string>
+    <string name="result_color">Colour</string>
+    <string name="result_phone_label">Owner phone number</string>
+    <string name="result_phone_call">Call</string>
+    <string name="result_phone_note">Use this number responsibly. Do not harass or share it with others.</string>
+    <!-- Card button. %1$s is the price such as ₹5 -->
+    <string name="result_get_phone_cta">Get the owner\'s phone number · %1$s</string>
+    <string name="result_get_phone_cta_sub">One tap, no need to type the number again</string>
+    <string name="result_paid">Paid</string>
+    <string name="result_demo_note">Demo data</string>
+
+    <!-- Wallet -->
+    <string name="wallet_title">Wallet</string>
+    <string name="wallet_balance_label">Available balance</string>
+    <string name="wallet_add_money">Add money</string>
+    <string name="wallet_transactions_title">Transactions</string>
+    <string name="wallet_filter_all">All</string>
+    <string name="wallet_filter_recharges">Recharges</string>
+    <string name="wallet_filter_searches">Searches</string>
+    <string name="wallet_empty">No transactions yet</string>
+    <string name="wallet_tx_recharge">Wallet recharge</string>
+    <string name="wallet_tx_rc">Vehicle details · %1$s</string>
+    <string name="wallet_tx_phone">Owner phone · %1$s</string>
+    <string name="wallet_tx_refund">Refund</string>
+    <string name="wallet_pending_payment">Confirming your payment…</string>
+    <string name="wallet_pending_refresh">Check status</string>
+
+    <!-- Payment result -->
+    <string name="payment_success_title">Payment successful</string>
+    <!-- %1$s is the new balance -->
+    <string name="payment_success_body">Your wallet balance is now %1$s.</string>
+    <string name="payment_pending_title">Confirming your payment</string>
+    <string name="payment_pending_body">We are waiting for the bank. Your balance will update automatically once it is confirmed.</string>
+    <string name="payment_failed_title">Payment failed</string>
+    <string name="payment_failed_body">No money was added. If the amount was debited, it will be refunded by your bank.</string>
+
+    <!-- Mock gateway (debug only) -->
+    <string name="mockpay_title" translatable="false">Test payment gateway</string>
+    <string name="mockpay_body" translatable="false">Debug build only. Choose the outcome to simulate.</string>
+    <string name="mockpay_success" translatable="false">Simulate success</string>
+    <string name="mockpay_pending" translatable="false">Simulate pending</string>
+    <string name="mockpay_failed" translatable="false">Simulate failure</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_terms">Terms and acceptable use</string>
+    <string name="settings_help">Help and support</string>
+    <string name="settings_write_to_us">Write to us</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_version">App version</string>
+    <string name="settings_other_app_title">Download our other app</string>
+    <string name="settings_other_app_name">Motor Insurance Calculator</string>
+    <string name="settings_open_google_play">Open in Google Play</string>
+    <string name="settings_privacy_body">We collect only what is needed to run your account and wallet. Registration numbers and results are stored securely and are never used for advertising. The full privacy policy will be published before launch.</string>
+    <string name="settings_terms_body">Use this app only for lawful purposes such as buying, selling, insuring or servicing a vehicle. Do not use the results to contact, harass or track people. Accounts used for misuse can be blocked without refund. The full terms will be published before launch.</string>
+    <string name="settings_help_body">Having trouble with a payment or a search? We are here to help.</string>
+    <string name="settings_section_about">About</string>
+
+    <!-- Errors (mapped from server error codes) -->
+    <string name="error_invalid_reg_no">That registration number does not look right.</string>
+    <string name="error_insufficient_balance">Your wallet balance is too low for this search.</string>
+    <string name="error_recharge_required">Please add money before starting a search.</string>
+    <string name="error_recharge_vehicle">Please add money to search for vehicle details.</string>
+    <string name="error_recharge_phone">Please add money to search for the owner\'s phone number.</string>
+    <string name="error_record_not_found">No record was found for this registration number. You were not charged.</string>
+    <string name="error_provider_unavailable">The data source is not responding. You were not charged. Please try again.</string>
+    <string name="error_rate_limited">Too many attempts. Please wait a moment and try again.</string>
+    <string name="error_payment_failed">The payment did not go through.</string>
+    <string name="error_network">No connection. Check your internet and try again.</string>
+    <string name="error_unauthenticated">Your session has ended. Please log in again.</string>
+    <string name="error_unknown">Something went wrong. Please try again.</string>
+
+    <!-- Accessibility -->
+    <string name="a11y_language_button">Change app language</string>
+    <string name="a11y_wallet_chip">Wallet balance %1$s. Open wallet.</string>
+    <string name="a11y_back">Go back</string>
+    <string name="a11y_clear">Clear</string>
+</resources>

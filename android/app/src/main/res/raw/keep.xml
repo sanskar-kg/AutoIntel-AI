@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keeps every string in the app bundle so Play Console's translation service can detect it
+     even though Dart reads strings through the generated lib/l10n/strings.g.dart. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/*" />

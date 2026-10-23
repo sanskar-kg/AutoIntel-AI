@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "532197475705",
+    "project_id": "autointel-ai-app",
+    "storage_bucket": "autointel-ai-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:532197475705:android:ff7100673e7179559cdba8",
+        "android_client_info": {
+          "package_name": "com.autointel.ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT-0wvGmOux4ZWR8uaWU5OTRqyu_JXnIc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
