@@ -95,6 +95,14 @@ h3 { font-size: 1.18rem; }
 .legal-content ul { padding-left: 21px; }
 .legal-content li + li { margin-top: 7px; }
 .notice { padding: 19px 21px; border-left: 4px solid var(--blue); border-radius: 0 13px 13px 0; background: #eaf5ff; color: #294b7b; }
+.request-form { display: grid; gap: 10px; max-width: 640px; padding: 26px; border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: var(--shadow); }
+.request-form label { color: var(--ink); font-weight: 750; font-size: .92rem; }
+.request-form input[type="text"], .request-form input[type="email"], .request-form input[type="tel"], .request-form textarea { width: 100%; margin: 0 0 9px; padding: 13px 14px; color: var(--ink); border: 1px solid var(--line); border-radius: 11px; background: var(--paper); font: inherit; }
+.request-form textarea { resize: vertical; }
+.request-form input:focus, .request-form textarea:focus { outline: 3px solid rgba(20, 99, 255, .16); border-color: var(--blue); }
+.checkbox-label { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0 10px; font-weight: 550 !important; }
+.checkbox-label input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--blue); }
+.form-note { max-width: 640px; color: var(--muted); font-size: .9rem; }
 .footer { padding: 30px 0 36px; border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; }
 .footer-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .footer-links { display: flex; gap: 20px; }
