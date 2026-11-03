@@ -72,9 +72,9 @@ void main() {
     final b = await newBackend();
     await recharge(b, 5000);
     final l = await b.lookup(LookupType.phone, 'MH12AB1234', 'k1');
-    expect(l.chargedPaise, 500);
+    expect(l.chargedPaise, 700);
     expect(l.phone, matches(RegExp(r'^\d{10}$')));
-    expect((await b.getWallet()).balancePaise, 4500);
+    expect((await b.getWallet()).balancePaise, 4300);
   });
 
   test('same idempotency key never charges twice', () async {

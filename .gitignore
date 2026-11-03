@@ -37,6 +37,7 @@ migrate_working_dir/
 
 # Local sandbox merchant credentials (passed to Flutter with --dart-define-from-file).
 /payu_sandbox.json
+/payu_production.json
 
 # Symbolication related
 app.*.symbols

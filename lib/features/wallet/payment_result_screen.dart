@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../core/money.dart';
+import '../../core/analytics.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/models.dart';
@@ -17,15 +20,36 @@ Future<void> runRecharge(
   // Grab the navigator first: on a successful first recharge the gate screen is replaced by the
   // main app while we await, so `context` may be gone but the confirmation must still show.
   final navigator = Navigator.of(context);
-  final result = await ref
-      .read(walletProvider.notifier)
-      .recharge(context, amountPaise);
+  late final PaymentResult result;
+  try {
+    result = await ref
+        .read(walletProvider.notifier)
+        .recharge(context, amountPaise);
+  } catch (error) {
+    await AppAnalytics.log(
+      'recharge_failed',
+      parameters: {'reason': _reason(error)},
+    );
+    rethrow;
+  }
+  if (result.status == OrderStatus.success) {
+    await AppAnalytics.log('recharge_success');
+  } else if (result.status == OrderStatus.failed) {
+    await AppAnalytics.log(
+      'recharge_failed',
+      parameters: {'reason': 'payment_failed'},
+    );
+  } else {
+    await AppAnalytics.log('recharge_pending');
+  }
   await navigator.push(
     MaterialPageRoute<void>(
       builder: (_) => PaymentResultScreen(result: result),
     ),
   );
 }
+
+String _reason(Object error) => error.runtimeType.toString().toLowerCase();
 
 class PaymentResultScreen extends ConsumerWidget {
   const PaymentResultScreen({super.key, required this.result});
@@ -34,6 +58,12 @@ class PaymentResultScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
+    unawaited(
+      AppAnalytics.log(
+        'payment_result_viewed',
+        parameters: {'status': result.status.name},
+      ),
+    );
     final (icon, color, title, body) = switch (result.status) {
       OrderStatus.success => (
         Icons.check_circle_rounded,

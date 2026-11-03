@@ -8,8 +8,11 @@ import '../data/backend.dart';
 import '../data/auth_repository.dart';
 import '../data/firestore_backend.dart';
 import '../data/models.dart';
+import '../data/mock_backend.dart';
 import '../data/payu_payment_gateway.dart';
 import '../data/remote_config_service.dart';
+import '../core/analytics.dart';
+import '../l10n/android_localization.dart';
 
 final sharedPrefsProvider = Provider<SharedPreferences>(
   (ref) => throw UnimplementedError('Override sharedPrefsProvider in main()'),
@@ -18,12 +21,12 @@ final sharedPrefsProvider = Provider<SharedPreferences>(
 final backendProvider = Provider<Backend>(
   (ref) => FirestoreBackend(ref.watch(authRepositoryProvider)),
 );
+final mockBackendProvider = Provider<MockBackend>(
+  (ref) => throw UnimplementedError('Override mockBackendProvider in tests.'),
+);
 final paymentGatewayProvider = Provider<PaymentGateway>((ref) {
   final backend = ref.watch(backendProvider);
-  return PayUPaymentGateway(
-    hashProvider: const PayUSandboxHashProvider(),
-    settleSandboxOrder: backend.reportGatewayOutcome,
-  );
+  return PayUPaymentGateway(hashProvider: PayUServerHashProvider(backend));
 });
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => ProductionAuthRepository(ref.watch(sharedPrefsProvider)),
@@ -33,9 +36,24 @@ final accountProvider = FutureProvider<Account?>(
   (ref) => ref.watch(authRepositoryProvider).restore(),
 );
 
-final configProvider = FutureProvider<AppConfig>(
-  (ref) => ref.watch(backendProvider).getConfig(),
-);
+final configProvider = FutureProvider<AppConfig>((ref) async {
+  final backendConfig = await ref.watch(backendProvider).getConfig();
+  final remote = await ref.watch(remoteSettingsProvider.future);
+  final remoteMinimum = _parseRupeesToPaise(remote.minimumRechargeAmount);
+  return AppConfig(
+    rcPricePaise: remote.rcPricePaise,
+    phonePricePaise: remote.phonePricePaise,
+    minRechargePaise: remoteMinimum ?? backendConfig.minRechargePaise,
+    maxRechargePaise: backendConfig.maxRechargePaise,
+    presetsPaise: backendConfig.presetsPaise,
+  );
+});
+
+int? _parseRupeesToPaise(String raw) {
+  final value = double.tryParse(raw.trim().replaceAll(',', ''));
+  if (value == null || value <= 0 || value > 1000000) return null;
+  return (value * 100).round();
+}
 
 final remoteSettingsProvider = FutureProvider<RemoteSettings>(
   (ref) => const RemoteConfigService().load(),
@@ -122,6 +140,14 @@ class WalletController extends AsyncNotifier<WalletState> {
   /// The wallet is credited only when the server says the order succeeded.
   Future<PaymentResult> recharge(BuildContext context, int amountPaise) async {
     final order = await _backend.createOrder(amountPaise);
+    await AppAnalytics.log(
+      'recharge_started',
+      parameters: {
+        'amount_bucket': AppAnalytics.amountBucket(amountPaise),
+        'gateway': order.gateway.toLowerCase(),
+        'order_status': order.status.name,
+      },
+    );
     final account = await ref.read(accountProvider.future);
     if (account == null) throw StateError('Sign in before recharging.');
     if (!context.mounted) throw StateError('Screen closed during recharge');
@@ -144,6 +170,13 @@ class WalletController extends AsyncNotifier<WalletState> {
     }
     final pending = order.isTerminal ? null : orderId;
     state = AsyncData(await _fetch(pending));
+    await AppAnalytics.log(
+      'payment_status_received',
+      parameters: {
+        'status': order.isTerminal ? order.status.name : 'pending',
+        'attempts': attempts,
+      },
+    );
     return PaymentResult(
       status: order.isTerminal ? order.status : OrderStatus.pending,
       amountPaise: order.amountPaise,
@@ -178,12 +211,20 @@ class LanguageController extends Notifier<Locale?> {
   }
 
   Future<void> set(Locale? locale) async {
+    final previous = state == null ? 'system' : _tag(state!);
+    await AndroidLocalization.load(
+      locale: locale == null ? null : _tag(locale),
+    );
     state = locale;
     final prefs = ref.read(sharedPrefsProvider);
     if (locale == null) {
       await prefs.remove(_key);
     } else {
       await prefs.setString(_key, _tag(locale));
+    }
+    final next = locale == null ? 'system' : _tag(locale);
+    if (previous != next) {
+      await AppAnalytics.log('language_changed', parameters: {'lang': next});
     }
   }
 

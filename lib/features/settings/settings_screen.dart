@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/providers.dart';
+import '../../core/analytics.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../l10n/strings.g.dart';
@@ -17,10 +20,16 @@ class SettingsScreen extends ConsumerWidget {
   static final _supportEmail = Uri(
     scheme: 'mailto',
     path: 'contactus@kalagato.co',
-    queryParameters: {'subject': 'AutoIntel support'},
+    queryParameters: {'subject': 'MotorInfo support'},
   );
   static final _motorInsuranceCalculatorUrl = Uri.parse(
     'https://play.google.com/store/apps/details?id=com.insurance.calculator.motor',
+  );
+  static final _privacyUrl = Uri.parse(
+    'https://sanskar-kg.github.io/AutoIntel-AI/privacy.html',
+  );
+  static final _termsUrl = Uri.parse(
+    'https://sanskar-kg.github.io/AutoIntel-AI/terms.html',
   );
 
   @override
@@ -51,7 +60,15 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.language,
               title: s.settingsLanguage,
               trailing: languageLabel,
-              onTap: () => showLanguageSheet(context),
+              onTap: () {
+                unawaited(
+                  AppAnalytics.log(
+                    'settings_option_tapped',
+                    parameters: {'option': 'language'},
+                  ),
+                );
+                showLanguageSheet(context);
+              },
             ),
             if (account != null) ...[
               _SettingsTile(
@@ -64,6 +81,10 @@ class SettingsScreen extends ConsumerWidget {
                 color: Colors.white,
                 backgroundColor: Colors.red,
                 onTap: () async {
+                  await AppAnalytics.log(
+                    'settings_option_tapped',
+                    parameters: {'option': 'sign_out'},
+                  );
                   await ref.read(authRepositoryProvider).signOut();
                   ref.invalidate(accountProvider);
                   ref.invalidate(walletProvider);
@@ -86,28 +107,55 @@ class SettingsScreen extends ConsumerWidget {
             _SettingsTile(
               icon: Icons.privacy_tip_outlined,
               title: s.settingsPrivacy,
-              onTap: () =>
-                  _openInfo(context, s.settingsPrivacy, s.settingsPrivacyBody),
+              onTap: () {
+                unawaited(
+                  AppAnalytics.log(
+                    'settings_option_tapped',
+                    parameters: {'option': 'privacy_policy'},
+                  ),
+                );
+                _openInAppPage(_privacyUrl);
+              },
             ),
             _SettingsTile(
               icon: Icons.gavel_outlined,
               title: s.settingsTerms,
-              onTap: () =>
-                  _openInfo(context, s.settingsTerms, s.settingsTermsBody),
+              onTap: () {
+                unawaited(
+                  AppAnalytics.log(
+                    'settings_option_tapped',
+                    parameters: {'option': 'terms'},
+                  ),
+                );
+                _openInAppPage(_termsUrl);
+              },
             ),
             _SettingsTile(
               icon: Icons.support_agent_outlined,
               title: s.settingsHelp,
-              onTap: () => _openInfo(
-                context,
-                s.settingsHelp,
-                s.settingsHelpBody,
-                actionLabel: s.settingsWriteToUs,
-                onAction: () => launchUrl(
-                  _supportEmail,
-                  mode: LaunchMode.platformDefault,
-                ),
-              ),
+              onTap: () {
+                unawaited(
+                  AppAnalytics.log(
+                    'settings_option_tapped',
+                    parameters: {'option': 'help'},
+                  ),
+                );
+                _openInfo(
+                  context,
+                  s.settingsHelp,
+                  s.settingsHelpBody,
+                  actionLabel: s.settingsWriteToUs,
+                  onAction: () {
+                    unawaited(
+                      AppAnalytics.log(
+                        'settings_option_tapped',
+                        parameters: {'option': 'write_to_us'},
+                      ),
+                    );
+                    launchUrl(_supportEmail, mode: LaunchMode.platformDefault);
+                  },
+                );
+              },
             ),
             _SettingsTile(
               icon: Icons.info_outline,
@@ -119,15 +167,27 @@ class SettingsScreen extends ConsumerWidget {
               title: s.settingsOtherAppTitle,
               appName: s.settingsOtherAppName,
               openLabel: s.settingsOpenGooglePlay,
-              onTap: () => launchUrl(
-                _motorInsuranceCalculatorUrl,
-                mode: LaunchMode.externalApplication,
-              ),
+              onTap: () {
+                unawaited(
+                  AppAnalytics.log(
+                    'settings_option_tapped',
+                    parameters: {'option': 'other_app'},
+                  ),
+                );
+                launchUrl(
+                  _motorInsuranceCalculatorUrl,
+                  mode: LaunchMode.externalApplication,
+                );
+              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _openInAppPage(Uri url) async {
+    await launchUrl(url, mode: LaunchMode.inAppWebView);
   }
 
   void _openInfo(
@@ -187,26 +247,34 @@ class _OtherAppCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: sora(12, weight: FontWeight.w600, color: AppColors.muted),
+                style: sora(
+                  12,
+                  weight: FontWeight.w600,
+                  color: AppColors.muted,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 appName,
-                style: sora(
-                  16,
-                  weight: FontWeight.w700,
-                  color: AppColors.navy,
-                ),
+                style: sora(16, weight: FontWeight.w700, color: AppColors.navy),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Text(
                     openLabel,
-                    style: sora(12, weight: FontWeight.w700, color: AppColors.blue),
+                    style: sora(
+                      12,
+                      weight: FontWeight.w700,
+                      color: AppColors.blue,
+                    ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.open_in_new, size: 15, color: AppColors.blue),
+                  const Icon(
+                    Icons.open_in_new,
+                    size: 15,
+                    color: AppColors.blue,
+                  ),
                 ],
               ),
             ],

@@ -1,34 +1,66 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/errors.dart';
+import '../core/analytics.dart';
 import '../core/theme.dart';
 import '../core/widgets.dart';
 import '../features/auth/auth_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/settings/language_sheet.dart';
 import '../features/wallet/recharge_gate_screen.dart';
 import '../features/wallet/wallet_screen.dart';
 import '../l10n/strings.g.dart';
+import '../l10n/android_localization.dart';
 import 'providers.dart';
 
-class AutoIntelApp extends ConsumerWidget {
+class AutoIntelApp extends ConsumerStatefulWidget {
   const AutoIntelApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AutoIntelApp> createState() => _AutoIntelAppState();
+}
+
+class _AutoIntelAppState extends ConsumerState<AutoIntelApp> {
+  @override
+  void initState() {
+    super.initState();
+    _loadNativeTranslations();
+  }
+
+  Future<void> _loadNativeTranslations() async {
+    final locale = ref.read(languageProvider);
+    await AndroidLocalization.load(locale: locale?.toLanguageTag());
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(languageProvider);
     final locale = ref.watch(languageProvider);
     return MaterialApp(
       onGenerateTitle: (context) => S.of(context).brandWordmark,
       debugShowCheckedModeBanner: false,
       theme: appTheme(),
       locale: locale,
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        final language = deviceLocale?.languageCode;
+        for (final supported in supportedLocales) {
+          if (supported.languageCode == language) return supported;
+        }
+        return const Locale('en');
+      },
       supportedLocales: [
-        for (final tag in supportedLanguageTags) Locale(tag.split('_').first),
+        for (final tag in supportedIndianLanguageTags)
+          Locale(tag.split('_').first),
       ],
-      localizationsDelegates: const [
+      localizationsDelegates: [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -104,7 +136,9 @@ class _Root extends ConsumerWidget {
         final wallet = walletState.value;
         final config = configState.value;
         if (wallet == null || config == null) return const _Splash();
-        if (wallet.showRechargeGate && !wallet.minRechargeDone) {
+        if (remoteSettings.onboardingWalletSpotlightEnabled &&
+            wallet.showRechargeGate &&
+            !wallet.minRechargeDone) {
           return RechargeGateScreen(config: config);
         }
         return const _MainShell();
@@ -145,10 +179,6 @@ class _Splash extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            S.of(context).brandTagline,
-            style: sora(12, color: Colors.white70),
-          ),
         ],
       ),
     ),
@@ -193,87 +223,250 @@ class _MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<_MainShell> {
-  static const _tooltipsSeenKey = 'onboarding.tooltips_seen.v1';
-  final _homeTooltipKey = GlobalKey<TooltipState>();
-  final _walletTooltipKey = GlobalKey<TooltipState>();
+  static const _spotlightSeenKey = 'onboarding.spotlight_seen.v1';
+  final _homeSpotlightKey = GlobalKey<State<StatefulWidget>>();
+  final _walletSpotlightKey = GlobalKey<State<StatefulWidget>>();
+  final _settingsSpotlightKey = GlobalKey<State<StatefulWidget>>();
+  BuildContext? _showcaseContext;
+  bool _spotlightCompleted = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _showFirstRunTooltips(),
+      (_) => _startFirstRunSpotlight(),
     );
+    unawaited(AppAnalytics.screen('home'));
   }
 
-  Future<void> _showFirstRunTooltips() async {
+  Future<void> _startFirstRunSpotlight() async {
     final prefs = ref.read(sharedPrefsProvider);
-    if (prefs.getBool(_tooltipsSeenKey) ?? false) return;
+    if (prefs.getBool(_spotlightSeenKey) ?? false) return;
 
-    TooltipState? homeTooltip;
-    for (var attempt = 0; attempt < 3 && mounted; attempt++) {
-      await Future<void>.delayed(const Duration(milliseconds: 350));
-      homeTooltip = _homeTooltipKey.currentState;
-      if (homeTooltip != null) break;
+    await AppAnalytics.log(
+      'onboarding_started',
+      parameters: {'journey': 'spotlight'},
+    );
+
+    for (var attempt = 0; attempt < 4 && mounted; attempt++) {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (!mounted) return;
+      final showcaseContext = _showcaseContext;
+      if (showcaseContext == null) continue;
+      final remote = ref.read(remoteSettingsProvider).value;
+      final keys = <GlobalKey<State<StatefulWidget>>>[
+        _homeSpotlightKey,
+        if (remote?.onboardingWalletSpotlightEnabled ?? true)
+          _walletSpotlightKey,
+        _settingsSpotlightKey,
+      ];
+      ShowCaseWidget.of(showcaseContext).startShowCase(keys);
+      return;
     }
-    if (!mounted || homeTooltip == null) return;
+  }
 
-    homeTooltip.ensureTooltipVisible();
-    await Future<void>.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-    _walletTooltipKey.currentState?.ensureTooltipVisible();
-    await prefs.setBool(_tooltipsSeenKey, true);
+  void _selectTab(int index) {
+    ref.read(tabProvider.notifier).select(index);
+    final screen = switch (index) {
+      0 => 'home',
+      1 => 'wallet',
+      _ => 'settings',
+    };
+    unawaited(AppAnalytics.log('tab_selected', parameters: {'tab': screen}));
+    unawaited(AppAnalytics.screen(screen));
+  }
+
+  Future<void> _completeSpotlight() async {
+    if (_spotlightCompleted) return;
+    _spotlightCompleted = true;
+    await ref.read(sharedPrefsProvider).setBool(_spotlightSeenKey, true);
+    await AppAnalytics.log(
+      'onboarding_done',
+      parameters: {'journey': 'spotlight'},
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
     final index = ref.watch(tabProvider);
-    return Scaffold(
-      body: IndexedStack(
-        index: index,
-        children: const [
-          HomeScreen(),
-          WalletScreen(),
-          SettingsScreen(),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.hairline)),
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: index,
-          onTap: ref.read(tabProvider.notifier).select,
-          backgroundColor: Colors.white,
-          selectedItemColor: AppColors.blue,
-          unselectedItemColor: AppColors.muted,
-          selectedLabelStyle: sora(12, weight: FontWeight.w600),
-          unselectedLabelStyle: sora(12),
-          items: [
-            BottomNavigationBarItem(
-              icon: Tooltip(
-                key: _homeTooltipKey,
-                message: s.tooltipHome,
-                triggerMode: TooltipTriggerMode.manual,
-                child: const Icon(Icons.home_rounded),
+    return ShowCaseWidget(
+      onFinish: _completeSpotlight,
+      onDismiss: (_) => _completeSpotlight(),
+      disableBarrierInteraction: true,
+      builder: (showcaseContext) {
+        _showcaseContext = showcaseContext;
+        return Scaffold(
+          body: IndexedStack(
+            index: index,
+            children: const [HomeScreen(), WalletScreen(), SettingsScreen()],
+          ),
+          bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: AppColors.hairline)),
+            ),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: index,
+              onTap: _selectTab,
+              backgroundColor: Colors.white,
+              selectedItemColor: AppColors.blue,
+              unselectedItemColor: AppColors.muted,
+              selectedLabelStyle: sora(12, weight: FontWeight.w600),
+              unselectedLabelStyle: sora(12),
+              items: [
+                BottomNavigationBarItem(
+                  icon: Showcase.withWidget(
+                    key: _homeSpotlightKey,
+                    targetShapeBorder: const CircleBorder(),
+                    overlayColor: Colors.black,
+                    overlayOpacity: 0.64,
+                    disableBarrierInteraction: true,
+                    container: _SpotlightCard(
+                      body: s.onboardingHomeBody,
+                      isLast: false,
+                      onNext: () {
+                        unawaited(
+                          AppAnalytics.log(
+                            'onboarding_step_completed',
+                            parameters: {'step': 'home'},
+                          ),
+                        );
+                        ShowCaseWidget.of(showcaseContext).next();
+                      },
+                      onSkip: () =>
+                          ShowCaseWidget.of(showcaseContext).dismiss(),
+                    ),
+                    child: const Icon(Icons.home_rounded),
+                  ),
+                  label: s.navHome,
+                ),
+                BottomNavigationBarItem(
+                  icon: Showcase.withWidget(
+                    key: _walletSpotlightKey,
+                    targetShapeBorder: const CircleBorder(),
+                    overlayColor: Colors.black,
+                    overlayOpacity: 0.64,
+                    disableBarrierInteraction: true,
+                    container: _SpotlightCard(
+                      body: s.onboardingWalletBody,
+                      isLast: false,
+                      onNext: () {
+                        unawaited(
+                          AppAnalytics.log(
+                            'onboarding_step_completed',
+                            parameters: {'step': 'wallet'},
+                          ),
+                        );
+                        ShowCaseWidget.of(showcaseContext).next();
+                      },
+                      onSkip: () =>
+                          ShowCaseWidget.of(showcaseContext).dismiss(),
+                    ),
+                    child: const Icon(Icons.account_balance_wallet_rounded),
+                  ),
+                  label: s.navWallet,
+                ),
+                BottomNavigationBarItem(
+                  icon: Showcase.withWidget(
+                    key: _settingsSpotlightKey,
+                    targetShapeBorder: const CircleBorder(),
+                    overlayColor: Colors.black,
+                    overlayOpacity: 0.64,
+                    disableBarrierInteraction: true,
+                    container: _SpotlightCard(
+                      body: s.onboardingSettingsBody,
+                      isLast: true,
+                      onNext: () {
+                        unawaited(
+                          AppAnalytics.log(
+                            'onboarding_step_completed',
+                            parameters: {'step': 'settings'},
+                          ),
+                        );
+                        ShowCaseWidget.of(showcaseContext).next();
+                      },
+                      onSkip: () =>
+                          ShowCaseWidget.of(showcaseContext).dismiss(),
+                    ),
+                    child: const Icon(Icons.settings_rounded),
+                  ),
+                  label: s.navSettings,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SpotlightCard extends StatelessWidget {
+  const _SpotlightCard({
+    required this.body,
+    required this.isLast,
+    required this.onNext,
+    required this.onSkip,
+  });
+
+  final String body;
+  final bool isLast;
+  final VoidCallback onNext;
+  final VoidCallback onSkip;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    return Semantics(
+      container: true,
+      label: body,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 300),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33000000),
+                blurRadius: 18,
+                offset: Offset(0, 8),
               ),
-              label: s.navHome,
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 10, 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(body, style: sora(13, height: 1.45)),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: onSkip,
+                      child: Text(s.onboardingSkip),
+                    ),
+                    TextButton(
+                      onPressed: onNext,
+                      child: Text(
+                        isLast ? s.onboardingDone : s.onboardingNext,
+                        style: sora(
+                          13,
+                          weight: FontWeight.w700,
+                          color: AppColors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Tooltip(
-                key: _walletTooltipKey,
-                message: s.tooltipWallet,
-                triggerMode: TooltipTriggerMode.manual,
-                child: const Icon(Icons.account_balance_wallet_rounded),
-              ),
-              label: s.navWallet,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.settings_rounded),
-              label: s.navSettings,
-            ),
-          ],
+          ),
         ),
       ),
     );

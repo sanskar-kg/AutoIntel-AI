@@ -17,6 +17,7 @@ Future<void> settle(WidgetTester tester, {int ms = 800}) async {
 }
 
 Future<void> pumpApp(WidgetTester tester) async {
+  SharedPreferences.resetStatic();
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
   await tester.binding.setSurfaceSize(const Size(412, 915));
@@ -162,7 +163,7 @@ void main() {
     );
     await tester.enterText(find.byType(TextField), 'ABC');
     await tester.pump();
-    final button = find.widgetWithText(FilledButton, 'Search for ₹5');
+    final button = find.widgetWithText(FilledButton, 'Search for ₹7');
     expect(tester.widget<FilledButton>(button).onPressed, isNull);
   });
 

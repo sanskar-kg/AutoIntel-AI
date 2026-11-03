@@ -219,7 +219,7 @@ class ProductionAuthRepository implements AuthRepository {
 
   static Account _accountFromJson(Map<String, Object?> json) => Account(
     id: json['id']! as String,
-    name: (json['name'] as String?) ?? 'AutoIntel user',
+    name: (json['name'] as String?) ?? 'MotorInfo user',
     email: (json['email'] as String?) ?? '',
     phone: (json['phone'] as String?) ?? '',
     provider: (json['provider'] as String?) ?? 'truecaller',

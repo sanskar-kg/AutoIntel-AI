@@ -9,13 +9,16 @@ import 'package:flutter/widgets.dart';
 import 'strings_runtime.dart';
 
 /// Language tags that have a values-xx/strings.xml (English first).
-const supportedLanguageTags = <String>['en'];
+final supportedLanguageTags = <String>['en'];
+
+const stringResourceKeys = <String>['app_name', 'truecaller_client_id', 'brand_wordmark', 'common_continue', 'common_cancel', 'common_confirm', 'common_retry', 'common_close', 'common_loading', 'common_back', 'common_not_available', 'remote_update_title', 'remote_update_body', 'remote_update_action', 'remote_stall_title', 'remote_stall_body', 'onboarding_home_body', 'onboarding_wallet_body', 'onboarding_settings_body', 'onboarding_skip', 'onboarding_next', 'onboarding_done', 'auth_title', 'auth_truecaller', 'auth_temporary', 'nav_home', 'nav_wallet', 'nav_settings', 'home_tile_rc_title', 'home_tile_rc_subtitle', 'home_tile_phone_title', 'home_tile_phone_subtitle', 'home_tile_price', 'home_wallet_chip_label', 'home_tile_locked', 'language_title', 'language_system_default', 'gate_title', 'gate_body', 'gate_prices_title', 'gate_price_rc', 'gate_price_phone', 'gate_pay_button', 'amount_custom_label', 'amount_custom_hint', 'amount_error_min', 'amount_error_max', 'lookup_rc_title', 'lookup_phone_title', 'lookup_rc_intro', 'lookup_phone_intro', 'lookup_field_label', 'lookup_field_hint', 'lookup_error_invalid', 'lookup_cost_info', 'lookup_button_search', 'lookup_button_recharge', 'confirm_title', 'confirm_reg_label', 'confirm_price_label', 'confirm_balance_after_label', 'result_title_rc', 'result_title_phone', 'result_owner_name', 'result_maker', 'result_model', 'result_fuel_type', 'result_vehicle_class', 'result_registration_date', 'result_rto', 'result_color', 'result_phone_label', 'result_phone_call', 'result_phone_note', 'result_get_phone_cta', 'result_get_phone_cta_sub', 'result_paid', 'result_demo_note', 'wallet_title', 'wallet_balance_label', 'wallet_add_money', 'wallet_transactions_title', 'wallet_filter_all', 'wallet_filter_recharges', 'wallet_filter_searches', 'wallet_empty', 'wallet_tx_recharge', 'wallet_tx_rc', 'wallet_tx_phone', 'wallet_tx_refund', 'wallet_pending_payment', 'wallet_pending_refresh', 'payment_success_title', 'payment_success_body', 'payment_pending_title', 'payment_pending_body', 'payment_failed_title', 'payment_failed_body', 'mockpay_title', 'mockpay_body', 'mockpay_success', 'mockpay_pending', 'mockpay_failed', 'settings_title', 'settings_language', 'settings_privacy', 'settings_terms', 'settings_help', 'settings_write_to_us', 'settings_sign_out', 'settings_version', 'settings_other_app_title', 'settings_other_app_name', 'settings_open_google_play', 'settings_privacy_body', 'settings_terms_body', 'settings_help_body', 'settings_section_about', 'error_invalid_reg_no', 'error_insufficient_balance', 'error_recharge_required', 'error_recharge_vehicle', 'error_recharge_phone', 'error_record_not_found', 'error_provider_unavailable', 'error_rate_limited', 'error_payment_failed', 'error_network', 'error_unauthenticated', 'error_unknown', 'a11y_language_button', 'a11y_wallet_chip', 'a11y_back', 'a11y_clear'];
+const pluralResourceKeys = <String>['history_count'];
 
 const _strings = <String, Map<String, String>>{
   'en': {
-    'app_name': 'AutoIntel AI',
-    'brand_wordmark': 'AutoIntel',
-    'brand_tagline': 'A MIC product',
+    'app_name': 'MotorInfo AI',
+    'truecaller_client_id': 'hqes5y3uvngfijv3oggjff0dioiu8edjicwdt3tgnba',
+    'brand_wordmark': 'MotorInfo',
     'common_continue': 'Continue',
     'common_cancel': 'Cancel',
     'common_confirm': 'Confirm',
@@ -25,15 +28,19 @@ const _strings = <String, Map<String, String>>{
     'common_back': 'Back',
     'common_not_available': 'Not available',
     'remote_update_title': 'Update required',
-    'remote_update_body': 'Please update AutoIntel to continue.',
+    'remote_update_body': 'Please update MotorInfo AI to continue.',
     'remote_update_action': 'Update app',
     'remote_stall_title': 'Temporarily unavailable',
-    'remote_stall_body': 'AutoIntel is being updated. Please try again shortly.',
-    'tooltip_home': 'Start a vehicle lookup from Home.',
-    'tooltip_wallet': 'Manage your balance and payments in Wallet.',
-    'auth_title': 'Sign in to AutoIntel',
+    'remote_stall_body': 'MotorInfo AI is being updated. Please try again shortly.',
+    'onboarding_home_body': 'Start a vehicle lookup from Home.',
+    'onboarding_wallet_body': 'Add money and track your balance in Wallet.',
+    'onboarding_settings_body': 'Change your language and manage your account in Settings.',
+    'onboarding_skip': 'Skip',
+    'onboarding_next': 'Next',
+    'onboarding_done': 'Done',
+    'auth_title': 'Sign in to MotorInfo AI',
     'auth_truecaller': 'Get started',
-    'auth_temporary': 'Continue temporarily',
+    'auth_temporary': 'Continue without sign in',
     'nav_home': 'Home',
     'nav_wallet': 'Wallet',
     'nav_settings': 'Settings',
@@ -52,7 +59,6 @@ const _strings = <String, Map<String, String>>{
     'gate_price_rc': 'Vehicle details',
     'gate_price_phone': 'Owner phone number',
     'gate_pay_button': 'Pay %1\$s',
-    'gate_later_button': 'I\'ll do it later',
     'amount_custom_label': 'Other amount',
     'amount_custom_hint': 'Enter amount (min %1\$s)',
     'amount_error_min': 'Minimum recharge is %1\$s',
@@ -149,6 +155,10 @@ const _strings = <String, Map<String, String>>{
 
 const _plurals = <String, Map<String, Map<String, String>>>{
   'en': {
+    'history_count': {
+      'one': '%1\$d search',
+      'other': '%1\$d searches',
+    },
   },
 };
 
@@ -156,7 +166,7 @@ const _plurals = <String, Map<String, Map<String, String>>>{
 class S extends StringsBase {
   S(Locale locale) : super(locale, _strings, _plurals);
 
-  static const LocalizationsDelegate<S> delegate = StringsDelegate<S>(
+  static final LocalizationsDelegate<S> delegate = StringsDelegate<S>(
     supportedLanguageTags,
     S.new,
   );
@@ -168,8 +178,6 @@ class S extends StringsBase {
   String get truecallerClientId => text('truecaller_client_id');
 
   String get brandWordmark => text('brand_wordmark');
-
-  String get brandTagline => text('brand_tagline');
 
   String get commonContinue => text('common_continue');
 
@@ -197,9 +205,17 @@ class S extends StringsBase {
 
   String get remoteStallBody => text('remote_stall_body');
 
-  String get tooltipHome => text('tooltip_home');
+  String get onboardingHomeBody => text('onboarding_home_body');
 
-  String get tooltipWallet => text('tooltip_wallet');
+  String get onboardingWalletBody => text('onboarding_wallet_body');
+
+  String get onboardingSettingsBody => text('onboarding_settings_body');
+
+  String get onboardingSkip => text('onboarding_skip');
+
+  String get onboardingNext => text('onboarding_next');
+
+  String get onboardingDone => text('onboarding_done');
 
   String get authTitle => text('auth_title');
 
@@ -212,6 +228,9 @@ class S extends StringsBase {
   String get navWallet => text('nav_wallet');
 
   String get navSettings => text('nav_settings');
+
+  String historyCount(int count) =>
+      plural('history_count', count, [count]);
 
   String get homeTileRcTitle => text('home_tile_rc_title');
 
@@ -245,8 +264,6 @@ class S extends StringsBase {
 
   String gatePayButton(String p1) =>
       format('gate_pay_button', [p1]);
-
-  String get gateLaterButton => text('gate_later_button');
 
   String get amountCustomLabel => text('amount_custom_label');
 

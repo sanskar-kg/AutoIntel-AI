@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../core/money.dart';
+import '../../core/analytics.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/models.dart';
@@ -59,12 +62,17 @@ class HomeScreen extends ConsumerWidget {
                         height: 105,
                         fit: BoxFit.contain,
                       ),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              const LookupScreen(type: LookupType.rc),
-                        ),
-                      ),
+                      onTap: () {
+                        unawaited(
+                          AppAnalytics.log('vehicle_details_entry_tapped'),
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                const LookupScreen(type: LookupType.rc),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 14),
                     _FeatureTile(
@@ -82,12 +90,15 @@ class HomeScreen extends ConsumerWidget {
                         height: 120,
                         fit: BoxFit.contain,
                       ),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              const LookupScreen(type: LookupType.phone),
-                        ),
-                      ),
+                      onTap: () {
+                        unawaited(AppAnalytics.log('owner_phone_entry_tapped'));
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                const LookupScreen(type: LookupType.phone),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

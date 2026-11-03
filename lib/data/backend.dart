@@ -13,10 +13,14 @@ abstract class Backend {
 
   /// Charges the wallet only if the provider call succeeds (server-side reserve/refund).
   Future<Lookup> lookup(LookupType type, String regNo, String idempotencyKey);
+  Future<List<Lookup>> getHistory();
   Future<PaymentOrder> createOrder(int amountPaise);
 
   /// Server truth for an order (the server asks the gateway); never trust the client callback.
   Future<PaymentOrder> getOrder(String orderId);
+
+  /// Generates a PayU Checkout Pro hash on the merchant server.
+  Future<Map<String, String>> generatePayUHash(Map<String, Object?> response);
 
   /// Reports checkout completion to the server. A successful client callback
   /// is never sufficient to credit funds; the server waits for gateway proof.

@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../app/providers.dart';
+import '../../core/analytics.dart';
 import '../../core/errors.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
@@ -45,6 +48,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   Future<void> _checkPending() async {
+    await AppAnalytics.log('pending_payment_refresh_tapped');
     setState(() => _busy = true);
     try {
       final result = await ref.read(walletProvider.notifier).checkPending();
@@ -157,7 +161,20 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   ),
                   onPressed: config == null
                       ? null
-                      : () => setState(() => _showPicker = !_showPicker),
+                      : () {
+                          final next = !_showPicker;
+                          unawaited(
+                            AppAnalytics.log(
+                              next
+                                  ? 'wallet_add_money_tapped'
+                                  : 'amount_picker_closed',
+                            ),
+                          );
+                          if (next) {
+                            unawaited(AppAnalytics.log('amount_picker_viewed'));
+                          }
+                          setState(() => _showPicker = next);
+                        },
                   icon: const Icon(Icons.add_rounded, size: 20),
                   label: Text(s.walletAddMoney),
                 ),
@@ -252,7 +269,15 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     label: Text(label),
     selected: _filter == value,
     showCheckmark: false,
-    onSelected: (_) => setState(() => _filter = value),
+    onSelected: (_) {
+      unawaited(
+        AppAnalytics.log(
+          'wallet_transaction_filter_changed',
+          parameters: {'filter': value.name},
+        ),
+      );
+      setState(() => _filter = value);
+    },
     labelStyle: sora(
       12,
       weight: FontWeight.w600,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/strings.g.dart';
 import 'theme.dart';
 
-/// Wordmark + family tagline (MIC's `Brand` pattern).
+/// MotorInfo wordmark.
 class Brand extends StatelessWidget {
   const Brand({super.key});
 
@@ -23,8 +23,6 @@ class Brand extends StatelessWidget {
             height: 1,
           ),
         ),
-        const SizedBox(height: 3),
-        Text(s.brandTagline, style: sora(11, color: AppColors.muted)),
       ],
     );
   }

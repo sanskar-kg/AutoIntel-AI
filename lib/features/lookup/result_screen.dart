@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/providers.dart';
+import '../../core/analytics.dart';
 import '../../core/money.dart';
 import '../../core/secure_screen.dart';
 import '../../core/theme.dart';
@@ -20,6 +23,12 @@ class ResultScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
     final isRc = lookup.type == LookupType.rc;
+    unawaited(
+      AppAnalytics.log(
+        'lookup_result_viewed',
+        parameters: {'type': lookup.type.name},
+      ),
+    );
     return SecureScreen(
       child: Scaffold(
         backgroundColor: AppColors.surfaceAlt,
@@ -221,7 +230,10 @@ class _PhoneCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: () => launchUrl(Uri(scheme: 'tel', path: phone)),
+                onPressed: () {
+                  unawaited(AppAnalytics.log('owner_phone_call_tapped'));
+                  launchUrl(Uri(scheme: 'tel', path: phone));
+                },
                 icon: const Icon(Icons.call_rounded, size: 18),
                 label: Text(s.resultPhoneCall),
               ),
@@ -251,14 +263,15 @@ class _PhoneCta extends ConsumerWidget {
     return SoftCard(
       color: AppColors.tintAmber,
       border: false,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => LookupScreen(
-            type: LookupType.phone,
-            initialRegNo: regNo,
+      onTap: () {
+        unawaited(AppAnalytics.log('owner_phone_cta_tapped'));
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                LookupScreen(type: LookupType.phone, initialRegNo: regNo),
           ),
-        ),
-      ),
+        );
+      },
       child: Row(
         children: [
           const Icon(Icons.phone_in_talk_rounded, color: AppColors.navy),

@@ -14,7 +14,7 @@ Built against a **mock backend** so every screen and flow works end to end befor
 | Wallet rules (min-recharge gate, charge only on success, idempotency, refunds on failure) | Done in `lib/data/mock_backend.dart`; to be re-implemented server-side |
 | Auth (register / login with email or mobile + password, MIC-style) | **Not built yet** (`FakeAuthRepository` signs in a demo user) |
 | Third-party vehicle API | Not connected (mock returns demo data, flagged "Demo data" in the UI) |
-| PayU / PhonePe | Not connected (`MockPaymentGateway` lets you pick success / pending / failure) |
+| PayU | Production Checkout Pro path implemented; deploy Firebase secrets and configure the PayU webhook before live payments |
 
 Swap points are the providers in `lib/app/providers.dart` (`backendProvider`, `paymentGatewayProvider`, `authRepositoryProvider`).
 
@@ -39,5 +39,17 @@ flutter pub get
 powershell ./ci.ps1        # analyze + string checks + tests
 flutter run
 ```
+
+## Production Android bundle
+
+Production PayU releases must load the local, git-ignored `payu_production.json`
+defines. Build the Play Store bundle with:
+
+```
+flutter build appbundle --release --dart-define-from-file=payu_production.json
+```
+
+For a new Play upload, also pass the next version code, for example
+`--build-number=2`.
 
 `android/gradle.properties` sets `kotlin.incremental=false` because the project (H:) and the pub cache (C:) are on different drives.

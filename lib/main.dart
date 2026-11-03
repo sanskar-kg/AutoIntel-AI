@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app/app.dart';
 import 'app/providers.dart';
 import 'core/crash_reporting.dart';
+import 'core/analytics.dart';
+import 'core/push_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,9 @@ Future<void> main() async {
     // must include google-services.json to enable anonymous fallback auth.
   }
   CrashReporter.configure(firebaseReady: firebaseReady);
+  AppAnalytics.configure(firebaseReady: firebaseReady);
+  if (firebaseReady) await configurePushNotifications();
+  await AppAnalytics.log('app_launch_viewed');
   final prefs = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(

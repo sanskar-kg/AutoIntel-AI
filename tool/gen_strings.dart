@@ -209,7 +209,14 @@ String _render(
     '/// Language tags that have a values-xx/strings.xml (English first).',
   );
   b.writeln(
-    'const supportedLanguageTags = <String>[${tags.map(_lit).join(', ')}];',
+    'final supportedLanguageTags = <String>[${tags.map(_lit).join(', ')}];',
+  );
+  b.writeln();
+  b.writeln(
+    'const stringResourceKeys = <String>[${en.values.where((e) => !e.isPlural).map((e) => _lit(e.name)).join(', ')}];',
+  );
+  b.writeln(
+    'const pluralResourceKeys = <String>[${en.values.where((e) => e.isPlural).map((e) => _lit(e.name)).join(', ')}];',
   );
   b.writeln();
   b.writeln('const _strings = <String, Map<String, String>>{');
@@ -243,7 +250,7 @@ String _render(
   b.writeln('  S(Locale locale) : super(locale, _strings, _plurals);');
   b.writeln();
   b.writeln(
-    '  static const LocalizationsDelegate<S> delegate = StringsDelegate<S>(',
+    '  static final LocalizationsDelegate<S> delegate = StringsDelegate<S>(',
   );
   b.writeln('    supportedLanguageTags,');
   b.writeln('    S.new,');

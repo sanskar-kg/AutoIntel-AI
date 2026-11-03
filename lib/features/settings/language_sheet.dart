@@ -1,36 +1,63 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
+import '../../core/analytics.dart';
 import '../../core/theme.dart';
 import '../../l10n/strings.g.dart';
 
-/// Language names in their own script. These are data, not UI copy, so they are
-/// intentionally not in strings.xml (a language is always named in itself).
 const _nativeNames = <String, String>{
   'en': 'English',
-  'hi': 'हिन्दी',
-  'mr': 'मराठी',
-  'gu': 'ગુજરાતી',
   'bn': 'বাংলা',
+  'gu': 'ગુજરાતી',
+  'hi': 'हिन्दी',
+  'kn': 'ಕನ್ನಡ',
+  'ml': 'മലയാളം',
+  'mr': 'मराठी',
+  'pa': 'ਪੰਜਾਬੀ',
   'ta': 'தமிழ்',
   'te': 'తెలుగు',
-  'kn': 'ಕನ್ನಡ',
 };
 
-/// Only offer language switching once at least one translation has been added.
-bool get hasMultipleLanguages => supportedLanguageTags.length > 1;
+const _indianLanguageCodes = {
+  'en',
+  'bn',
+  'gu',
+  'hi',
+  'kn',
+  'ml',
+  'mr',
+  'pa',
+  'ta',
+  'te',
+};
+
+List<String> get supportedIndianLanguageTags {
+  // Play Console supplies translated values-xx resources after processing the
+  // uploaded bundle. Keep the picker stable even before those resources arrive;
+  // Android falls back to English for a missing translation.
+  supportedLanguageTags
+    ..clear()
+    ..addAll(_indianLanguageCodes);
+  return _indianLanguageCodes.toList(growable: false);
+}
+
+bool get hasMultipleLanguages => true;
 
 String nativeLanguageName(String tag) =>
-    _nativeNames[tag.split('_').first] ?? tag;
+    _nativeNames[tag.split('_').first] ?? 'English';
 
-Future<void> showLanguageSheet(BuildContext context) =>
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: Colors.white,
-      builder: (_) => const _LanguageSheet(),
-    );
+Future<void> showLanguageSheet(BuildContext context) async {
+  await AppAnalytics.log('language_picker_viewed');
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    backgroundColor: Colors.white,
+    builder: (_) => const _LanguageSheet(),
+  );
+}
 
 class _LanguageSheet extends ConsumerWidget {
   const _LanguageSheet();
@@ -54,6 +81,12 @@ class _LanguageSheet extends ConsumerWidget {
           ? const Icon(Icons.check_circle, color: AppColors.blue)
           : const Icon(Icons.circle_outlined, color: AppColors.border),
       onTap: () {
+        unawaited(
+          AppAnalytics.log(
+            'language_option_tapped',
+            parameters: {'language': label},
+          ),
+        );
         onTap();
         Navigator.pop(context);
       },
@@ -82,7 +115,7 @@ class _LanguageSheet extends ConsumerWidget {
                     isSelected: selected == null,
                     onTap: () => ref.read(languageProvider.notifier).set(null),
                   ),
-                  for (final tag in supportedLanguageTags)
+                  for (final tag in supportedIndianLanguageTags)
                     option(
                       label: nativeLanguageName(tag),
                       isSelected: selectedTag == tag.split('_').first,
@@ -100,27 +133,25 @@ class _LanguageSheet extends ConsumerWidget {
   }
 }
 
-/// Globe + language code, as in MIC's dashboard header.
 class LanguageButton extends ConsumerWidget {
   const LanguageButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!hasMultipleLanguages) return const SizedBox.shrink();
     ref.watch(languageProvider);
-    final code = Localizations.localeOf(context).languageCode.toUpperCase();
+    final language = Localizations.localeOf(context).languageCode;
     return Tooltip(
       message: S.of(context).a11yLanguageButton,
       child: TextButton.icon(
         onPressed: () => showLanguageSheet(context),
         icon: const Icon(Icons.language, size: 22, color: AppColors.navy),
         label: Text(
-          code,
-          style: sora(12, weight: FontWeight.w700, color: AppColors.navy),
+          nativeLanguageName(language),
+          style: sora(11, weight: FontWeight.w700, color: AppColors.navy),
         ),
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          minimumSize: const Size(48, 48),
+          minimumSize: const Size(88, 48),
         ),
       ),
     );

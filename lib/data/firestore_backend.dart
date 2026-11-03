@@ -32,14 +32,16 @@ class FirestoreBackend implements Backend {
     }
     final uri = Uri.parse('$_baseUrl$path');
     final response = switch (method) {
-      'GET' => await http
-          .get(uri, headers: _headers(token))
-          .timeout(_requestTimeout),
-      'POST' => await http.post(
-            uri,
-            headers: _headers(token),
-            body: jsonEncode(body ?? const {}),
-          ).timeout(_requestTimeout),
+      'GET' =>
+        await http.get(uri, headers: _headers(token)).timeout(_requestTimeout),
+      'POST' =>
+        await http
+            .post(
+              uri,
+              headers: _headers(token),
+              body: jsonEncode(body ?? const {}),
+            )
+            .timeout(_requestTimeout),
       _ => throw StateError('Unsupported HTTP method: $method'),
     };
     final payload = response.body.isEmpty
@@ -56,18 +58,16 @@ class FirestoreBackend implements Backend {
     'Content-Type': 'application/json',
   };
 
-  AppException _serverError(String? code) => AppException(
-    switch (code) {
-      'INSUFFICIENT_BALANCE' => ErrorCode.insufficientBalance,
-      'RECHARGE_REQUIRED' => ErrorCode.rechargeRequired,
-      'INVALID_REG_NO' => ErrorCode.invalidRegNo,
-      'RECORD_NOT_FOUND' => ErrorCode.recordNotFound,
-      'PROVIDER_UNAVAILABLE' => ErrorCode.providerUnavailable,
-      'PAYMENT_FAILED' => ErrorCode.paymentFailed,
-      'UNAUTHENTICATED' => ErrorCode.unauthenticated,
-      _ => ErrorCode.unknown,
-    },
-  );
+  AppException _serverError(String? code) => AppException(switch (code) {
+    'INSUFFICIENT_BALANCE' => ErrorCode.insufficientBalance,
+    'RECHARGE_REQUIRED' => ErrorCode.rechargeRequired,
+    'INVALID_REG_NO' => ErrorCode.invalidRegNo,
+    'RECORD_NOT_FOUND' => ErrorCode.recordNotFound,
+    'PROVIDER_UNAVAILABLE' => ErrorCode.providerUnavailable,
+    'PAYMENT_FAILED' => ErrorCode.paymentFailed,
+    'UNAUTHENTICATED' => ErrorCode.unauthenticated,
+    _ => ErrorCode.unknown,
+  });
 
   @override
   Future<AppConfig> getConfig() async {
@@ -122,6 +122,16 @@ class FirestoreBackend implements Backend {
   }
 
   @override
+  Future<List<Lookup>> getHistory() async {
+    final data = await _request('GET', '/v1/lookups');
+    final values = (data['lookups'] ?? data['entries']) as List? ?? const [];
+    return [
+      for (final value in values)
+        _lookup(Map<String, Object?>.from(value as Map)),
+    ];
+  }
+
+  @override
   Future<PaymentOrder> createOrder(int amountPaise) async {
     final data = await _request(
       'POST',
@@ -138,6 +148,21 @@ class FirestoreBackend implements Backend {
   }
 
   @override
+  Future<Map<String, String>> generatePayUHash(
+    Map<String, Object?> response,
+  ) async {
+    final data = await _request(
+      'POST',
+      '/v1/payments/payu/hash',
+      body: {'response': response},
+    );
+    return {
+      for (final entry in data.entries)
+        entry.key: entry.value?.toString() ?? '',
+    };
+  }
+
+  @override
   Future<void> reportGatewayOutcome(String orderId, OrderStatus status) async {
     await _request(
       'POST',
@@ -146,9 +171,8 @@ class FirestoreBackend implements Backend {
     );
   }
 
-  static int _int(Object? value) => value is int
-      ? value
-      : int.parse(value?.toString() ?? '0');
+  static int _int(Object? value) =>
+      value is int ? value : int.parse(value?.toString() ?? '0');
 
   static LedgerEntry _ledger(Map<String, Object?> data) => LedgerEntry(
     id: data['id']! as String,

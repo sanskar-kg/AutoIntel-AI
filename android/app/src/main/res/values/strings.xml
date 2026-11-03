@@ -6,10 +6,9 @@
   Placeholders are positional (%1$s string, %1$d integer) so translators can reorder them.
 -->
 <resources>
-    <string name="app_name" translatable="false">AutoIntel AI</string>
+    <string name="app_name" translatable="false">MotorInfo AI</string>
     <string name="truecaller_client_id" translatable="false">hqes5y3uvngfijv3oggjff0dioiu8edjicwdt3tgnba</string>
-    <string name="brand_wordmark" translatable="false">AutoIntel</string>
-    <string name="brand_tagline">A MIC product</string>
+    <string name="brand_wordmark" translatable="false">MotorInfo</string>
 
     <!-- Common -->
     <string name="common_continue">Continue</string>
@@ -23,24 +22,32 @@
 
     <!-- Remote Config gates -->
     <string name="remote_update_title">Update required</string>
-    <string name="remote_update_body">Please update AutoIntel to continue.</string>
+    <string name="remote_update_body">Please update MotorInfo AI to continue.</string>
     <string name="remote_update_action">Update app</string>
     <string name="remote_stall_title">Temporarily unavailable</string>
-    <string name="remote_stall_body">AutoIntel is being updated. Please try again shortly.</string>
+    <string name="remote_stall_body">MotorInfo AI is being updated. Please try again shortly.</string>
 
-    <!-- First-run tooltips -->
-    <string name="tooltip_home">Start a vehicle lookup from Home.</string>
-    <string name="tooltip_wallet">Manage your balance and payments in Wallet.</string>
+    <!-- First-run spotlight onboarding -->
+    <string name="onboarding_home_body">Start a vehicle lookup from Home.</string>
+    <string name="onboarding_wallet_body">Add money and track your balance in Wallet.</string>
+    <string name="onboarding_settings_body">Change your language and manage your account in Settings.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_done">Done</string>
 
     <!-- Authentication -->
-    <string name="auth_title">Sign in to AutoIntel</string>
+    <string name="auth_title">Sign in to MotorInfo AI</string>
     <string name="auth_truecaller">Get started</string>
-    <string name="auth_temporary">Continue temporarily</string>
+    <string name="auth_temporary">Continue without sign in</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_wallet">Wallet</string>
     <string name="nav_settings">Settings</string>
+    <plurals name="history_count">
+        <item quantity="one">%1$d search</item>
+        <item quantity="other">%1$d searches</item>
+    </plurals>
 
     <!-- Home -->
     <string name="home_tile_rc_title">Vehicle Details</string>
@@ -65,7 +72,6 @@
     <string name="gate_price_phone">Owner phone number</string>
     <!-- Button. %1$s is the amount such as ₹100 -->
     <string name="gate_pay_button">Pay %1$s</string>
-    <string name="gate_later_button">I\'ll do it later</string>
 
     <!-- Amount picker -->
     <string name="amount_custom_label">Other amount</string>
@@ -109,7 +115,7 @@
     <string name="result_phone_label">Owner phone number</string>
     <string name="result_phone_call">Call</string>
     <string name="result_phone_note">Use this number responsibly. Do not harass or share it with others.</string>
-    <!-- Card button. %1$s is the price such as ₹5 -->
+    <!-- Card button. %1$s is a price such as ₹7 -->
     <string name="result_get_phone_cta">Get the owner\'s phone number · %1$s</string>
     <string name="result_get_phone_cta_sub">One tap, no need to type the number again</string>
     <string name="result_paid">Paid</string>

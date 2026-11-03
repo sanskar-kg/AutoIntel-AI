@@ -31,12 +31,14 @@ class MockBackend implements Backend {
   int _balance = 0;
   bool _minRechargeDone = false;
   final List<LedgerEntry> _ledger = [];
+  final List<Lookup> _history = [];
+  final Map<String, Lookup> _idempotentLookups = {};
   final Map<String, PaymentOrder> _orders = {};
   final Map<String, DateTime> _pendingSince = {};
 
   static const _config = AppConfig(
     rcPricePaise: 200,
-    phonePricePaise: 500,
+    phonePricePaise: 700,
     minRechargePaise: 2000,
     maxRechargePaise: 1000000,
     presetsPaise: [5000, 10000, 20000, 50000],
@@ -54,6 +56,19 @@ class MockBackend implements Backend {
           (e) => LedgerEntry.fromJson(Map<String, Object?>.from(e as Map)),
         ),
       );
+      _history.addAll(
+        (j['history'] as List? ?? const []).map(
+          (e) => Lookup.fromJson(Map<String, Object?>.from(e as Map)),
+        ),
+      );
+      final savedIdempotent = j['idempotency'] as Map?;
+      if (savedIdempotent != null) {
+        for (final entry in savedIdempotent.entries) {
+          _idempotentLookups[entry.key as String] = Lookup.fromJson(
+            Map<String, Object?>.from(entry.value as Map),
+          );
+        }
+      }
       for (final e in (j['orders']! as List)) {
         final o = PaymentOrder.fromJson(Map<String, Object?>.from(e as Map));
         _orders[o.id] = o;
@@ -63,6 +78,8 @@ class MockBackend implements Backend {
       _balance = 0;
       _minRechargeDone = false;
       _ledger.clear();
+      _history.clear();
+      _idempotentLookups.clear();
       _orders.clear();
     }
   }
@@ -73,6 +90,10 @@ class MockBackend implements Backend {
       'balance': _balance,
       'minRechargeDone': _minRechargeDone,
       'ledger': _ledger.map((e) => e.toJson()).toList(),
+      'history': _history.map((e) => e.toJson()).toList(),
+      'idempotency': _idempotentLookups.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
       'orders': _orders.values.map((e) => e.toJson()).toList(),
     }),
   );
@@ -110,6 +131,8 @@ class MockBackend implements Backend {
     await _delay();
     final reg = normalizeRegNo(regNo);
     if (!isValidRegNo(reg)) throw const AppException(ErrorCode.invalidRegNo);
+    final previous = _idempotentLookups[idempotencyKey];
+    if (previous != null) return previous;
     if (!_minRechargeDone) {
       throw const AppException(ErrorCode.rechargeRequired);
     }
@@ -158,8 +181,16 @@ class MockBackend implements Backend {
         regNoMasked: lookup.regNoMasked,
       ),
     );
+    _history.add(lookup);
+    _idempotentLookups[idempotencyKey] = lookup;
     await _save();
     return lookup;
+  }
+
+  @override
+  Future<List<Lookup>> getHistory() async {
+    await _delay();
+    return List.unmodifiable(_history.reversed);
   }
 
   @override
@@ -195,6 +226,13 @@ class MockBackend implements Backend {
     }
     return order;
   }
+
+  @override
+  Future<Map<String, String>> generatePayUHash(
+    Map<String, Object?> response,
+  ) async => throw StateError(
+    'PayU server hashing is unavailable in the mock backend.',
+  );
 
   @override
   Future<void> reportGatewayOutcome(String orderId, OrderStatus status) =>

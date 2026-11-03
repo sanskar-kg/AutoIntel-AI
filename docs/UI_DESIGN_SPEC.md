@@ -77,7 +77,7 @@ Shown immediately after sign-in and whenever balance is below the minimum on a l
 - Title: "Add money to get started"
 - Explanation: "A minimum recharge of ₹X is needed to use lookups."
 - Preset amount chips (₹50, ₹100, ₹200, ₹500) + custom amount field (min enforced).
-- Price list card: "Vehicle details ₹2 · Owner phone ₹5" (values from config).
+- Price list card: "Vehicle details ₹2 · Owner phone ₹7" by default (values from Remote Config).
 - Primary button "Pay ₹100" → gateway checkout.
 - Lookup tiles on Home are visible but show a lock overlay until this is done.
 
@@ -89,7 +89,7 @@ Sanskar
 ┌──────────────┐ ┌──────────────┐
 │ Vehicle      │ │ Owner Phone  │
 │ Details      │ │ Lookup       │
-│ ₹2           │ │ ₹5           │
+│ ₹2           │ │ ₹7           │
 │        [car] │ │       [phone]│
 └──────────────┘ └──────────────┘   ← pastel tiles (#EAF7FF, #FFF8E9)
 Recent lookups
@@ -110,7 +110,7 @@ Back circle + title ("Vehicle Details" / "Owner Phone").
 ### 3.7 Result screen
 - Hero card: reg number plate chip, maker + model as title.
 - Details card: label/value rows (Owner name, Maker, Model, plus provider extras).
-- CTA card (RC result only): "Get owner's phone number — ₹5" (tinted `#FFF8E9`, one tap, goes through the confirm sheet).
+- CTA card (RC result only): "Get owner's phone number — ₹7" by default (tinted `#FFF8E9`, one tap, goes through the confirm sheet; price comes from Remote Config).
 - Phone result: large number, **Call** button, short responsible-use note.
 - Screenshots blocked by default (see TRD §8).
 - Footer: "Saved to History — reopening is free."

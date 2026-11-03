@@ -17,7 +17,7 @@ AutoIntel AI is a small, pay-per-use Android utility. A user enters a vehicle re
 | # | Feature | Input | Output | Price (configurable) |
 |---|---------|-------|--------|----------------------|
 | F1 | **Vehicle RC Intelligence** | Registration number | Owner name, maker, model, and other fields the 3rd-party API returns | ₹2 |
-| F2 | **Vehicle Owner Phone Lookup** | Registration number | Owner's phone number | ₹5 (TBC) |
+| F2 | **Vehicle Owner Phone Lookup** | Registration number | Owner's phone number | ₹7 (Remote Config default) |
 | F3 | **Wallet** | Recharge amount | Balance, transaction history | — |
 | F4 | **Wallet recharge** | Amount | Credited balance via PayU **or** PhonePe | — |
 | F5 | **Localization** | — | UI in multiple languages, auto-translated via Play Console | — |
@@ -50,14 +50,14 @@ Anyone needing quick vehicle details: used-car dealers/brokers, buyers, mechanic
 ### 4.3 Phone number lookup (F2)
 - FR-9: Same input rules and charge-confirmation flow as F1, at the higher price.
 - FR-10: Result shows the phone number with tap-to-call. It is not shown on the RC result unless the user bought it.
-- FR-11: Can be started from an F1 result ("Get owner's phone — ₹5") so the user doesn't retype the number.
+- FR-11: Can be started from an F1 result ("Get owner's phone — ₹7") so the user doesn't retype the number.
 
 ### 4.4 Wallet (F3, F4)
 - FR-12: Wallet balance is visible on Home and in a persistent header chip.
 - FR-13: Recharge via **PayU or PhonePe** (final choice TBD; the app is built behind a gateway abstraction — TRD §7). Preset amounts (₹50 / ₹100 / ₹200 / ₹500) plus custom amount.
 - FR-14: Balance is credited only after **server-side** payment confirmation, never from the client's success callback alone.
 - FR-15: Transaction history (recharges, debits, refunds) with date, amount, description, and status; paginated.
-- FR-16: Prices for F1 and F2 and the minimum recharge are server-configurable (no app update to change them).
+- FR-16: Prices for F1 and F2 and the minimum recharge are server-configurable (no app update to change them). Lookup prices are controlled by Firebase Remote Config.
 
 ### 4.5 Localization (F5)
 - FR-18: No user-visible string is hard-coded in code. All strings live in `res/values/strings.xml` (see TRD §9).
@@ -82,7 +82,7 @@ Anyone needing quick vehicle details: used-car dealers/brokers, buyers, mechanic
 |---|------|----------------|
 | R1 | **Phone number lookup (F2) is sensitive.** Exposing an owner's phone number from a plate number raises DPDPA 2023 and Google Play *User Data / Personal & Sensitive Information* policy exposure, and risk of stalking/harassment use. | Could cause Play rejection or takedown. Need provider's legal basis, an acceptable-use policy, consent/terms screen, and probably a "report misuse" path. Recommend reviewing before building F2. |
 | R2 | **Wallet top-ups on Google Play.** Play policy generally requires Google Play Billing for digital goods/services consumed in the app; a PayU/PhonePe wallet may be flagged. | Could block release. Verify against current Play payments policy (and India-specific alternative billing options) before launch. |
-| R3 | Provider response schema, SLAs, per-call cost, rate limits unknown. | Pricing (₹2 / ₹5) must exceed provider cost + gateway fees (~2%). |
+| R3 | Provider response schema, SLAs, per-call cost, rate limits unknown. | Pricing (₹2 / ₹7 by default) must exceed provider cost + gateway fees (~2%). |
 | R4 | PayU vs PhonePe not decided. | Affects TRD §7 only (abstracted). |
 | R5 | Minimum first recharge amount, refund policy (wallet balance refundability), and KYC requirements for wallets (RBI PPI rules may apply to *stored-value* wallets that can be cashed out; closed-loop, non-refundable credits are usually treated differently). | Needs legal/finance confirmation. |
 | R6 | Final launch language list. | Drives string review effort. |

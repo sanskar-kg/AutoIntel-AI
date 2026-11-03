@@ -1,5 +1,20 @@
 import 'package:flutter/widgets.dart';
 
+final runtimeStringOverrides = <String, Map<String, String>>{};
+final runtimePluralOverrides = <String, Map<String, Map<String, String>>>{};
+
+void setRuntimeTranslations({
+  required Map<String, Map<String, String>> strings,
+  required Map<String, Map<String, Map<String, String>>> plurals,
+}) {
+  runtimeStringOverrides
+    ..clear()
+    ..addAll(strings);
+  runtimePluralOverrides
+    ..clear()
+    ..addAll(plurals);
+}
+
 /// Looks strings up for one locale with fallback: full tag (pt_BR) → language (pt) → English.
 /// The typed accessors live in the generated `strings.g.dart`.
 class StringsBase {
@@ -19,6 +34,8 @@ class StringsBase {
   @protected
   String text(String key) {
     for (final tag in _chain) {
+      final runtimeValue = runtimeStringOverrides[tag]?[key];
+      if (runtimeValue != null) return runtimeValue;
       final value = _strings[tag]?[key];
       if (value != null) return value;
     }
@@ -33,6 +50,13 @@ class StringsBase {
   String plural(String key, int count, List<Object> args) {
     final category = pluralCategory(locale.languageCode, count);
     for (final tag in _chain) {
+      final runtimeForms = runtimePluralOverrides[tag]?[key];
+      if (runtimeForms != null) {
+        return formatTemplate(
+          runtimeForms[category] ?? runtimeForms['other']!,
+          args,
+        );
+      }
       final forms = _plurals[tag]?[key];
       if (forms != null) {
         return formatTemplate(forms[category] ?? forms['other']!, args);

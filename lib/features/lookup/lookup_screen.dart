@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../core/errors.dart';
+import '../../core/analytics.dart';
 import '../../core/money.dart';
 import '../../core/reg_no.dart';
 import '../../core/theme.dart';
@@ -41,6 +43,12 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
 
   bool get _valid => isValidRegNo(_controller.text);
 
+  @override
+  void initState() {
+    super.initState();
+    unawaited(AppAnalytics.screen('lookup_${widget.type.name}'));
+  }
+
   String _rechargeRequiredMessage(S s) => widget.type == LookupType.rc
       ? s.errorRechargeVehicle
       : s.errorRechargePhone;
@@ -50,13 +58,25 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
 
   Future<void> _search(AppConfig config, int balance) async {
     final s = S.of(context);
+    await AppAnalytics.log(
+      'lookup_cta_tapped',
+      parameters: {'type': widget.type.name},
+    );
     if (!_valid) {
+      await AppAnalytics.log(
+        'lookup_validation_failed',
+        parameters: {'type': widget.type.name},
+      );
       setState(() => _touched = true);
       return;
     }
     final reg = normalizeRegNo(_controller.text);
     final price = config.priceFor(widget.type);
     if (balance < price) {
+      await AppAnalytics.log(
+        'insufficient_balance_shown',
+        parameters: {'type': widget.type.name},
+      );
       ref.read(tabProvider.notifier).select(1);
       Navigator.of(context).popUntil((r) => r.isFirst);
       return;
@@ -67,27 +87,46 @@ class _LookupScreenState extends ConsumerState<LookupScreen> {
       backgroundColor: Colors.white,
       builder: (_) => _ConfirmSheet(reg: reg, price: price, balance: balance),
     );
+    await AppAnalytics.log(
+      ok == true
+          ? 'lookup_confirmation_completed'
+          : 'lookup_confirmation_cancelled',
+      parameters: {'type': widget.type.name},
+    );
     if (ok != true || !mounted) return;
 
     setState(() {
       _busy = true;
       _error = null;
     });
+    await AppAnalytics.log(
+      'lookup_started',
+      parameters: {'type': widget.type.name},
+    );
     try {
       final lookup = await ref
           .read(backendProvider)
           .lookup(widget.type, reg, _newKey());
       await ref.read(walletProvider.notifier).refresh();
+      await AppAnalytics.log(
+        'lookup_success',
+        parameters: {'type': widget.type.name},
+      );
       if (!mounted) return;
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(builder: (_) => ResultScreen(lookup: lookup)),
       );
       return;
     } catch (e) {
+      final code = e is AppException ? e.code.name : 'unknown';
+      await AppAnalytics.log(
+        'lookup_failed',
+        parameters: {'type': widget.type.name, 'code': code},
+      );
       if (mounted) {
         setState(
-          () => _error = e is AppException &&
-                  e.code == ErrorCode.rechargeRequired
+          () =>
+              _error = e is AppException && e.code == ErrorCode.rechargeRequired
               ? _rechargeRequiredMessage(s)
               : errorMessage(s, e),
         );

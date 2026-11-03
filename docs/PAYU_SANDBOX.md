@@ -1,4 +1,4 @@
-# PayU Checkout Pro sandbox
+# PayU Checkout Pro
 
 The debug Android build uses PayU Checkout Pro in test mode for wallet
 recharges. It uses the public sample merchant key and salt from PayU's Flutter
@@ -21,18 +21,17 @@ flutter run -d <device-id> `
 The test salt is used locally only in debug builds. Never pass a production
 salt through `--dart-define` or store it in the app.
 
-## Before production
+## Production setup status
 
-1. Add a backend endpoint that accepts PayU's `hashName`, `hashString`,
-   `hashType`, and optional `postSalt`, then generates the required hash using
-   the merchant salt stored in a server secret manager.
-2. Replace `PayUSandboxHashProvider` with a backend-backed hash provider.
-3. Create wallet orders on the backend and credit the wallet only after a
-   verified PayU webhook or Verify Payment API response. Never trust the SDK's
-   client success callback as proof of payment.
-4. Use production merchant credentials and PayU's production environment.
-5. Configure merchant-owned HTTPS success/failure URLs and remove all PayU
-   test-only Android metadata (already isolated to `src/debug`).
+The production Checkout Pro path, backend hash endpoint, PayU webhook, Verify
+Payment reconciliation, and idempotent wallet crediting are implemented.
+Follow [functions/README.md](../functions/README.md) to set the Firebase
+secrets, deploy `authApi`, and configure the PayU webhook before accepting live
+payments.
+
+The release build requires the public merchant key in the ignored
+`payu_production.json` file. Never pass the production salt through
+`--dart-define` or store it in the app.
 
 PayU notes that UPI in-app and intent flows are unavailable in test mode. Use
 the test card or net-banking credentials documented by PayU when validating the

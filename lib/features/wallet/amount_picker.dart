@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/money.dart';
+import '../../core/analytics.dart';
 import '../../core/theme.dart';
 import '../../data/models.dart';
 import '../../l10n/strings.g.dart';
@@ -52,6 +55,15 @@ class _AmountPickerState extends State<AmountPicker> {
   }
 
   void _selectPreset(int paise) {
+    unawaited(
+      AppAnalytics.log(
+        'recharge_amount_selected',
+        parameters: {
+          'source': 'preset',
+          'amount_bucket': AppAnalytics.amountBucket(paise),
+        },
+      ),
+    );
     _controller.clear();
     setState(() {
       _presetPaise = paise;
@@ -73,6 +85,15 @@ class _AmountPickerState extends State<AmountPicker> {
         error = s.amountErrorMax(formatPaise(widget.config.maxRechargePaise));
       } else {
         valid = paise;
+        unawaited(
+          AppAnalytics.log(
+            'recharge_amount_selected',
+            parameters: {
+              'source': 'custom',
+              'amount_bucket': AppAnalytics.amountBucket(paise),
+            },
+          ),
+        );
       }
     }
     setState(() {

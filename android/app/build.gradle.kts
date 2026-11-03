@@ -39,6 +39,15 @@ android {
         versionName = flutter.versionName
     }
 
+    // Play Console injects translated values-xx resources into the bundle.
+    // Keep every language in the base APK because the in-app picker can select
+    // a language different from the device language.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     signingConfigs {
         create("release") {
             keyAlias = keystoreProperties["keyAlias"] as String
@@ -51,6 +60,10 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

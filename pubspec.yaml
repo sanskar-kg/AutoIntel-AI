@@ -1,5 +1,5 @@
 name: autointel_ai
-description: "AutoIntel AI - vehicle RC and owner phone lookup with a prepaid wallet."
+description: "MotorInfo AI - vehicle RC and owner phone lookup with a prepaid wallet."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+6
 
 environment:
   sdk: ^3.12.0
@@ -43,13 +43,16 @@ dependencies:
     sdk: flutter
   firebase_auth: ^6.1.2
   firebase_core: ^4.2.1
+  firebase_analytics: ^12.0.4
   firebase_crashlytics: ^5.4.0
   firebase_remote_config: ^6.7.0
+  firebase_messaging: ^16.7.0
   http: ^1.5.0
   truecaller_sdk: 1.1.0
   flutter_secure_storage: ^9.2.4
   payu_checkoutpro_flutter: ^1.4.5
   crypto: ^3.0.7
+  showcaseview: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +65,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   xml: ^7.0.1
+
+# shared_preferences_android 2.5.0 switched the Android implementation to
+# Pigeon JNI. Its release bridge can fail on startup with
+# SharedPreferencesApiRegistrar.getAll NoSuchMethodError. Keep the stable
+# Kotlin-Pigeon implementation until the JNI release path is compatible.
+dependency_overrides:
+  shared_preferences_android: 2.4.26
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

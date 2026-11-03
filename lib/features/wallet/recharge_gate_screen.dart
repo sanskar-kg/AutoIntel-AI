@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/providers.dart';
 import '../../core/errors.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
@@ -128,12 +127,6 @@ class _RechargeGateScreenState extends ConsumerState<RechargeGateScreen> {
                       ),
                       busy: _busy,
                       onPressed: _amount == null ? null : _pay,
-                    ),
-                    TextButton(
-                      onPressed: _busy
-                          ? null
-                          : ref.read(walletProvider.notifier).deferRechargeGate,
-                      child: Text(s.gateLaterButton),
                     ),
                     ErrorMessage(_error),
                   ],
